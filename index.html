@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:200,300,400,500,700" rel="stylesheet">
+</head>
+
+<body>
+    <nav id="navbar">
+        <header>PageSpeed Configuration</header>
+        <ul>
+            <li>
+                <a class="nav-link" href="#Enabling_the_Module">Enabling the Module</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Apache-Specific_Configuration">Apache-Specific Configuration</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Nginx-Specific_Configuration">Nginx-Specific Configuration</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Respecting_Vary_Headers">Respecting Vary Headers</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Honoring_no-transform_Cache-Control_Headers">Honoring no-transform Cache-Control Headers</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Lower-casing_HTML_element_and_attribute_names">Lower-casing HTML element and attribute names</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Preserving_HTML_caching_headers">Preserving HTML caching headers</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Specifying_the_value_for_the_PageSpeed_header">Specifying the value for the PageSpeed header</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Location-Specific_Configuration">Location-Specific Configuration</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Using_PageSpeed_With_Virtual_Hosts">Using PageSpeed With Virtual Hosts</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Preserve_URL_Relativity">Preserve URL Relativity</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Configuring_the_location_of_static_assets">Configuring the location of static assets</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Configuring_headers_for_optimized_resources">Configuring headers for optimized resources</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#List_outstanding_urls_on_error">List outstanding urls on error</a>
+            </li>
+            <li>
+                <a class="nav-link" href="#Using_PageSpeed_as_a_reverse_proxy">Using PageSpeed as a reverse proxy</a>
+            </li>
+        </ul>
+    </nav>
+    <main id="main-doc">
+        <section class="main-section" id="Enabling_the_Module">
+            <header>Enabling the Module</header>
+            <p>
+                    PageSpeed contains an "output filter" plus several content handlers.
+                    
+                    Note: The location of the configuration file is dependent both on the Linux distribution on which PageSpeed is installed and on whether you're using PageSpeed with Apache or Nginx.
+                    
+                    In Apache the configuration file is pagespeed.conf and will be in either:
+                    
+                    Debian/Ubuntu: /etc/apache2/mods-available/
+                    CentOS/Fedora: /etc/httpd/conf.d/
+                    In Nginx the configuration typically should go in your nginx.conf which for source installs defaults to being in:
+                    /usr/local/nginx/conf/
+                    In Apache PageSpeed is enabled automatically when you install the module while in Nginx you need to add several lines to your nginx.conf. In every server block where PageSpeed is enabled add:
+                    
+                    pagespeed on;
+                    
+                    # Needs to exist and be writable by nginx.  Use tmpfs for best performance.
+                    pagespeed FileCachePath /var/ngx_pagespeed_cache;
+                    
+                    # Ensure requests for pagespeed optimized resources go to the pagespeed handler
+                    # and no extraneous headers get set.
+                    location ~ "\.pagespeed\.([a-z]\.)?[a-z]{2}\.[^.]{10}\.[^.]+" {
+                      add_header "" "";
+                    }
+                    location ~ "^/pagespeed_static/" { }
+                    location ~ "^/ngx_pagespeed_beacon$" { }
+                    See the Admin Page documentation for instructions on how to configure handlers to provide visibility and control into PageSpeed's operation.
+            </p>
+            <code>
+
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Apache-Specific_Configuration">
+            <header>Apache-Specific Configuration</header>
+            <p>
+                    Setting up the Output Filter 🔗
+                    
+                    The output filter is used to parse, optimize, and re-serialize HTML content that is generated elsewhere in the Apache server.
+                    
+                    # Direct Apache to send all HTML output to the mod_pagespeed output handler.
+                    AddOutputFilterByType MOD_PAGESPEED_OUTPUT_FILTER text/html
+                    Note: mod_pagespeed automatically enables mod_deflate for compression.
+                    
+                    Turning the module on and off 🔗
+                    
+                    To turn mod_pagespeed ON, insert as the top line of pagespeed.conf:
+                    
+                    ModPagespeed on
+                    There are two ways to disable mod_pagespeed. To disable HTML rewriting but continue to serve .pagespeed. resources and parse query options (for instance for ?ModPagespeed=on) put this line in your configuration:
+                    
+                    ModPagespeed off
+                    To completely disable mod_pagespeed (.pagespeed. resources will result in 404s) use the following line:
+                    
+                    ModPagespeed unplugged
+                    The on and off values can be used in .htaccess files, <Directory> scopes, query parameters, and headers. The unplugged value can only be used in the top-level Apache configuration and in virtual hosts. Note that ModPagespeed on in a virtual host can override a top-level unplugged directive.
+                    
+                    Support for Apache 2.4.x 🔗
+                    
+                    mod_pagespeed is compatible with Apache 2.2.x and Apache 2.4.x series, versions 2.4.2 and newer. Please note that Apache 2.4.1 has a bug that may cause stability problems in combination with mod_pagespeed, so use with 2.4.1 is strongly discouraged.
+                    
+                    As Apache 2.4 is not API compatible with 2.2, support for it is provided via a separate module binary, mod_pagespeed_ap24.so instead of the usual mod_pagespeed.so. The configuration provided in our binary packages will normally load the right module version automatically. However, if you upgrade the CentOS packages from an earlier version, the needed configuration change may not get applied on top of a user-customized pagespeed.conf, so you may need to adjust the LoadModule line manually.
+                    
+                    Source builds with mod_pagespeed-provided Apache headers will build both 2.2.x and 2.4.x binaries as well, and you will need to add a LoadModule line matching the server version in use, or use a pattern similar to:
+                    
+                    <IfModule !mod_version.c>
+                      LoadModule version_module /usr/lib/apache2/modules/mod_version.so
+                    </IfModule>
+                    
+                    <IfVersion < 2.4>
+                      LoadModule pagespeed_module /usr/lib/apache2/modules/mod_pagespeed.so
+                    </IfVersion>
+                    <IfVersion >= 2.4.2>
+                      LoadModule pagespeed_module /usr/lib/apache2/modules/mod_pagespeed_ap24.so
+                    </IfVersion>
+                    to auto-detect. Builds against system Apache headers will only be compatible with that version family, and will always produce a single module named mod_pagespeed.so.
+            </p>
+            <code>
+    
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Nginx-Specific_Configuration">
+            <header>Nginx-Specific Configuration</header>
+            <p>
+                    Turning the module on and off 🔗
+                    
+                    To turn ngx_pagespeed ON, put anywhere in your http or server block:
+                    
+                    pagespeed on;
+                    To turn ngx_pagespeed OFF, use off:
+                    
+                    pagespeed off;
+                    This is equivalent to the "unplugged" setting for mod_pagespeed, and entirely disables ngx_pagespeed.
+            </p>
+            <code>
+        
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Respecting_Vary_Headers">
+            <header>Respecting Vary Headers</header>
+            <p>
+                    In order to maximize the number of resources that PageSpeed can rewrite, by default the module does not respect Vary: User-Agent and other Vary headers on resource files, such as JavaScript and css files. By disregarding the Vary headers, PageSpeed is able to keep the size of the cache down. PageSpeed will always respect Vary: Accept-Encoding, regardless of this setting. PageSpeed will also always respect Vary headers on HTML files, regardless of this setting.
+                    
+                    If a site has resources that legitimately vary on User-Agent, or on some other attribute, then in order to preserve that behavior, you must add
+                    
+                    Apache:
+                    ModPagespeedRespectVary on
+                    Nginx:
+                    pagespeed RespectVary on;
+                    to your configuration file.
+                    
+                    Please note that turning on this option will disable optimization of any resources with Vary headers, apart from Vary: Accept-Encoding.
+            </p>
+            <code>
+            
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Honoring_no-transform_Cache-Control_Headers">
+            <header>Honoring no-transform Cache-Control Headers</header>
+            <p>
+                    By default, PageSpeed does not rewrite resources that have Cache-Control: no-transform set in the Response Header. This is true for all types of resources, such as JavaScript, images, CSS etc. By respecting Cache-Control: no-transform headers, PageSpeed cannot optimize resources that could otherwise be rewritten.
+                    
+                    To optimize resources irrespective of Cache-Control: no-transform headers, you must add
+                    
+                    Apache:
+                    ModPagespeedDisableRewriteOnNoTransform off
+                    Nginx:
+                    pagespeed DisableRewriteOnNoTransform off;
+                    to your configuration file.
+                    
+                    Please note that PageSpeed will always respect Cache-Control: no-transform headers on HTML files irrespective of the setting. And also, PageSpeed will always retain the Cache-Control: no-transform headers on the resource irrespective of the setting so that the downstream cache control mechanisms do not get affected.
+            </p>
+            <code>
+                
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Lower-casing_HTML_element_and_attribute_names">
+            <header>Lower-casing HTML element and attribute names</header>
+            <p>
+                    HTML is case-insensitive, whereas XML and XHTML are not. Web performance Best Practices suggest using lowercase keywords, and PageSpeed can safely make that transformation in HTML documents.
+                    
+                    In general, PageSpeed knows whether a document is HTML or not via Content-Type tags in HTTP headers, and DOCTYPE. However, many web sites have Content-Type: text/html for resources that are actually XML documents.
+                    
+                    If PageSpeed lowercases keywords in XML pages, it can break the consumers of such pages, such as Flash. To be conservative and avoid breaking such pages, PageSpeed does not lowercase HTML element and attribute names by default. However, you can sometimes achieve a modest improvement in the size of compressed HTML by enabling this feature with:
+                    
+                    Apache:
+                    ModPagespeedLowercaseHtmlNames on
+                    Nginx:
+                    pagespeed LowercaseHtmlNames on;
+                    These directives can be used in location-specific configuration sections.
+                    
+                    Risks
+                    
+                    This switch is only risky in the presence of XML files that are incorrectly served with Content-type: text/html. Lower-casing XML element and attribute may affect whatever software is reading the XML.
+            </p>
+            <code>
+                    
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Preserving_HTML_caching_headers">
+            <header>Preserving HTML caching headers</header>
+            <p>
+                    By default, PageSpeed serves all HTML with Cache-Control: no-cache, max-age=0 because the transformations made to the page may not be cacheable for extended periods of time.
+                    
+                    If you want to force PageSpeed to leave the original HTML caching headers you can add:
+                    
+                    Apache:
+                    ModPagespeedModifyCachingHeaders off
+                    Nginx:
+                    pagespeed ModifyCachingHeaders off;
+                    Note: We do not suggest you turn this option off. It breaks PageSpeed's caching assumptions and can lead to unoptimized HTML being served from a proxy caches set up in front of the server. If you do turn it off, we suggest that you do not set long caching headers to HTML or users may receive stale or unoptimized content.
+            </p>
+            <code>
+                        
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Specifying_the_value_for_the_PageSpeed_header">
+            <header>Specifying the value for the PageSpeed header</header>
+            <p>
+                    By default, PageSpeed adds an header, X-Mod-Pagespeed in Apache, X-Page-Speed in Nginx, with the version of PageSpeed being used. The format of this header is:
+                    
+                    [Major].[Minor].[Branch].[Point]-[Commit]
+                    For example:
+                    
+                    1.9.32.3-4448
+                    We update these following this schedule:
+                    
+                    Major Version
+                    Incremented when we make very large changes.
+                    Minor Version
+                    Incremented for each release since the last major version
+                    Branch Number
+                    Incremented for every release. Always increasing.
+                    Point Number
+                    Incremented each time we build a new release candidate or patch release, resets on each minor release.
+                    Commit Number
+                    Incremented each time we accept a commit to the PSOL trunk. Always increasing.
+                    All servers running a given release will have the same value for this header by default. If you would like to change the value reported, you can use the XHeaderValue directive to specify what to use instead:
+                    
+                    Apache:
+                    ModPagespeedXHeaderValue "Powered By mod_pagespeed"
+                    Nginx:
+                    pagespeed XHeaderValue "Powered By ngx_pagespeed";
+                    Note: You cannot suppress the injection of this header. This is because it is used to prevent infinite loops and unnecessary rewrites when PageSpeed fetches resources from an origin that also uses PageSpeed.
+            </p>
+            <code>
+                            
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Location-Specific_Configuration">
+            <header>Location-Specific Configuration</header>
+            <p>
+                    With an .htaccess file (Apache), <Directory> scope (Apache), or location block (Nginx) you can control most of the PageSpeed directives. Note, however, that the file-matching is only relevant to the HTML file, and not to any of the resources referenced from the HTML file. To restrict resources by directory, you must use the PageSpeed Allow and Disallow directives, using full paths or wildcards in those directives.
+                            
+                            Warning: Resources and the HTML files that reference them must have the same options. If they differ you may see poor performance and inconsistent application of options.
+                            
+                            In Apache, the advantage of .htaccess is that it can be used in environments where the site administrator does not have access to the server configuration. However, there is a significant per-request overhead from processing .htaccess files. See The Apache HTTP Server Documentation:
+                            
+                            Note: You should avoid using .htaccess files completely if you have access to the httpd main server config file. Using .htaccess files slows down your Apache server. Any directive that you can include in a .htaccess file is better set in a <Directory> block, as it will have the same effect with better performance.
+                            
+                            Virtual hosts are generally a better way of configuring multiple sites on the same server.
+            </p>
+            <code>
+                                
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Using_PageSpeed_With_Virtual_Hosts">
+            <header>Using PageSpeed With Virtual Hosts</header>
+            <p>
+                    By default, PageSpeed enables itself for the entire server, with global options propagating to all VirtualHosts (Apache) or server blocks (Nginx). Options can be overridden per host, including the ability the limit which hosts PageSpeed runs on.
+                    
+                    Note: When using Apache, it used to be possible to set InheritVHostConfig to "off" to stop global configuration from propagating to VHosts. However, enabling InheritVHostConfig makes PageSpeed options behave like other Apache options and has been the recommended configuration since 2012. The option has now been deprecated and will be forced to "on" in the next major PageSpeed release.
+                    
+                    Apache:
+                    ModPagespeed On
+                    ModPagespeedInheritVHostConfig on
+                    ModPagespeedFileCachePath "/var/cache/mod_pagespeed/"
+                    ModPagespeedEnableFilters combine_css,combine_javascript
+                    # Direct Apache to send all HTML output to the mod_pagespeed
+                    # output handler.
+                    AddOutputFilterByType MOD_PAGESPEED_OUTPUT_FILTER text/html
+                    
+                    NameVirtualHost *:80
+                    <VirtualHost *:80>
+                      DocumentRoot /www/example1
+                      ServerName www.example1.com
+                      ModPagespeedMapRewriteDomain cdn.example1.com *example.com
+                    </VirtualHost>
+                    
+                    <VirtualHost *:80>
+                      DocumentRoot /www/example2
+                      ServerName www.example2.org
+                      ModPagespeedMapRewriteDomain cdn.example2.org *example.org
+                      # Don't want combine_css here
+                      ModPagespeedDisableFilters combine_css
+                    </VirtualHost>
+                    
+                    <VirtualHost *:80>
+                      DocumentRoot /www/example3
+                      ServerName www.example3.org
+                      # mod_pagespeed off for this virtual host
+                      ModPagespeed Off
+                    </VirtualHost>
+                    Nginx:
+                    http {
+                      pagespeed On;
+                      pagespeed FileCachePath "/var/cache/ngx_pagespeed/";
+                      pagespeed EnableFilters combine_css,combine_javascript;
+                    
+                      server {
+                        listen 80;
+                        server_name www.example1.com;
+                        root /www/example1;
+                        pagespeed MapRewriteDomain cdn.example1.com *example.com;
+                      }
+                    
+                      server {
+                        listen 80;
+                        server_name www.example2.org;
+                        root /www/example2;
+                        pagespeed MapRewriteDomain cdn.example2.org *example.org;
+                        # Don't want combine_css here
+                        pagespeed DisableFilters combine_css;
+                      }
+                    
+                      server {
+                        listen 80;
+                        server_name www.example3.org;
+                        root /www/example3;
+                    
+                        # mod_pagespeed off for this virtual host
+                        pagespeed off;
+                      }
+            </p>
+            <code>
+                                    
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Preserve_URL_Relativity">
+            <header>Preserve URL Relativity</header>
+            <p>
+                    Previous versions of PageSpeed would rewrite relative URLs into absolute URLs. This wastes bytes and can cause problems for sites that sit behind HTTPS terminators.
+                    
+                    With PreserveUrlRelativity on, PageSpeed will keep URLs the way they were found. Some examples:
+                    
+                    Original URL	Rewritten URL
+                    foo/bar.png	foo/bar.png.pagespeed.ic.Hash.png
+                    /bar.png	/bar.png.pagespeed.ic.Hash.png
+                    //example.com/bar.png	//example.com/bar.png.pagespeed.ic.Hash.png
+                    http://example.com/bar.png	http://example.com/bar.png.pagespeed.ic.Hash.png
+                    To enable this option, add:
+                    
+                    Apache:
+                    ModPagespeedPreserveUrlRelativity on
+                    Nginx:
+                    pagespeed PreserveUrlRelativity on;
+                    to your configuration file.
+                    
+                    Note: This option will be enabled by default in future versions of PageSpeed and eventually the option will be removed entirely.
+            </p>
+            <code>
+                                        
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Configuring_the_location_of_static_assets">
+            <header>Configuring the location of static assets</header>
+            <p>
+                    Several filters, including defer_javascript and lazyload_images, require external resources that must be loaded from somewhere. Before 1.8.31.2, mod_pagespeed would load these files from /mod_pagespeed_static while ngx_pagespeed would load them from /ngx_pagespeed_static. In 1.8.31.2 the default was changed to /pagespeed_static for both platforms and a directive was added to make the path configurable:
+                    
+                    Apache:
+                    ModPagespeedStaticAssetPrefix /custom/static/
+                    Nginx:
+                    pagespeed StaticAssetPrefix /custom/static/;
+            </p>
+            <code>
+                                            
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Configuring_headers_for_optimized_resources">
+            <header>Configuring headers for optimized resources</header>
+            <p>
+                    When creating optimized .pagespeed. resources, PageSpeed generates headers that are correct for most users. However, some users require additional headers. For instance if you're using CORS and you want to have PageSpeed set Access-Control-Allow-Origin: http://www.example.com headers on the resources it creates, you can set:
+                    
+                    Apache:
+                    ModPagespeedAddResourceHeader "Access-Control-Allow-Origin" "http://www.example.com"
+                    Nginx:
+                    pagespeed AddResourceHeader "Access-Control-Allow-Origin" "http://www.example.com";
+                    If you have multiple headers you want inserted you can include an AddResourceHeader directive for each one.
+            </p>
+            <code>
+                                                
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="List_outstanding_urls_on_error">
+            <header>List outstanding urls on error</header>
+            <p>
+                    When debugging fetching, it can be useful to know how things are failing. If you enable ListOutstandingUrlsOnError then PageSpeed will report a message in the error log at level "error" for every URL fetch in flight when the HTTP stack encounters a system error, e.g. "Connection Refused". To enable this feature, set:
+                    
+                    Apache:
+                    ModPagespeedListOutstandingUrlsOnError on
+                    Nginx:
+                    pagespeed ListOutstandingUrlsOnError on;
+            </p>
+            <code>
+                                                    
+            </code>
+            <li>
+
+            </li>
+        </section>
+        <section class="main-section" id="Using_PageSpeed_as_a_reverse_proxy">
+            <header>Using PageSpeed as a reverse proxy</header>
+            <p>
+                    Typically, PageSpeed is used on an Apache or Nginx server that is already serving its own content. However, PageSpeed can be used with Nginx or Apache as a proxy for another server.
+                    
+                    With Apache and mod_pagespeed, mod_proxy can be used to configure Apache as a reverse proxy.
+                    
+                    With Nginx and ngx_pagespeed, proxy_pass can be used to configure Nginx as a reverse proxy.
+            </p>
+            <code>
+                                                        
+            </code>
+            <li>
+
+            </li>
+        </section>
+    </main>
+    <footer>
+        <div id="footer-content">
+            <div id="footer-text">
+                Made for freeCodeCamp by Shay Meredith, 2017
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

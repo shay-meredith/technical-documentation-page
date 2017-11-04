@@ -1,0 +1,139 @@
+body {
+    background-color: #ffffff;
+    font-family: "Roboto", sans-serif;
+    font-size: 1.2em;
+    font-weight: 300;
+}
+main {
+    max-width: 70%;
+    margin: 100px auto;
+}
+section {
+    padding-top: 60px;
+}
+h1 {
+    color: white;
+    flex-grow: 3;
+    font-size: 2.5em;
+    letter-spacing: 2px;
+    line-height: 50px;
+    text-shadow: 2px 2px #006064;
+}
+h2 {
+    padding-top: 15px;
+    text-align: center;
+}
+header {
+    align-items: center;
+    display: flex;
+    font-size: 1.5em;
+    justify-content: space-between;
+    margin-left: -8px;
+    top: 0px;
+    width: 100%;
+    vertical-align: middle;
+}
+#navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+#navbar li {
+    display: flex;
+    float: left;
+    width: 100%;
+}
+#navbar li a {
+    color: black;
+    display: block;
+    padding: .8vw .8vw .8vw .8vw;
+    text-decoration: none;
+}
+#navbar li a:hover {
+    background-color: #B2EBF2;
+    border: 1px solid #B2EBF2;
+    border-radius: 5px;
+    box-shadow: 1px 1px 1px rgba(222, 222, 222, 0.6);
+    margin: -1px; 
+}
+footer {
+    background-color: #00BCD4;
+    height: 100px;
+    margin: 0px -8px -8px -8px;
+    text-align: right;
+    vertical-align: bottom;
+}
+#footer-content {
+    margin: 10px 20px 0px 0px;
+    text-align: right;
+}
+#footer-nav-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-left: auto;
+}
+#footer-nav-bar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+#footer-nav-bar li {
+    float: right;
+    margin: 10px 12px 8px 10px;
+}
+#footer-nav-bar li a {
+    color: black;
+    display: block;
+    padding: 8px;
+    text-decoration: none;
+}
+#footer-text {
+    margin-right: 20px;
+}
+@media screen and (max-width: 1000px) {
+    body {
+        font-size: 2vw;
+    }
+    h1 {
+        flex-grow: 0;
+        font-size: 5vw;
+        line-height: 20px;
+        margin: 10px 10px 10px 0px;
+        text-align: center;
+        width: 70%;
+    }
+    #header {
+        align-items: center;
+        flex-wrap: wrap;
+        height: auto;
+        justify-content: center;
+    }
+    #header-img {
+        margin: 10px 5px 10px 10px;
+        padding: 0;
+        position: relative;
+        left: 9%;
+    }
+    #nav-bar {
+        max-width: 100%;
+    }
+    #nav-bar ul {
+        text-align: center;
+    }
+    #nav-bar li {
+        line-height: 8px;
+        width: 80%;
+    }
+    #nav-bar li a {
+        width: 50%;
+    }
+    h2 {
+        padding-top: 30px;
+    }
+}
+    .material-icons.md-48 {
+        margin-right: 0;
+    }
