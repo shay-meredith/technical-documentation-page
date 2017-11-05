@@ -61,18 +61,28 @@
         <section class="main-section" id="Enabling_the_Module">
             <header>Enabling the Module</header>
             <p>
-                    PageSpeed contains an "output filter" plus several content handlers.
-                    
-                    Note: The location of the configuration file is dependent both on the Linux distribution on which PageSpeed is installed and on whether you're using PageSpeed with Apache or Nginx.
-                    
-                    In Apache the configuration file is pagespeed.conf and will be in either:
-                    
-                    Debian/Ubuntu: /etc/apache2/mods-available/
+                PageSpeed contains an "output filter" plus several content handlers.
+                
+                <code class="note">
+                    <strong>Note:</strong> The location of the configuration file is dependent both on the Linux distribution on which PageSpeed is installed and on whether you're using PageSpeed with Apache or Nginx.
+                </code>
+                
+                In Apache the configuration file is pagespeed.conf and will be in either:
+                
+                <code>
+                    /Ubuntu: /etc/apache2/mods-available/
                     CentOS/Fedora: /etc/httpd/conf.d/
-                    In Nginx the configuration typically should go in your nginx.conf which for source installs defaults to being in:
+                </code>
+
+                In Nginx the configuration typically should go in your nginx.conf which for source installs defaults to being in:
+                
+                <code>
                     /usr/local/nginx/conf/
-                    In Apache PageSpeed is enabled automatically when you install the module while in Nginx you need to add several lines to your nginx.conf. In every server block where PageSpeed is enabled add:
-                    
+                </code>
+
+                In Apache PageSpeed is enabled automatically when you install the module while in Nginx you need to add several lines to your nginx.conf. In every server block where PageSpeed is enabled add:
+                
+                <code>
                     pagespeed on;
                     
                     # Needs to exist and be writable by nginx.  Use tmpfs for best performance.
@@ -81,62 +91,71 @@
                     # Ensure requests for pagespeed optimized resources go to the pagespeed handler
                     # and no extraneous headers get set.
                     location ~ "\.pagespeed\.([a-z]\.)?[a-z]{2}\.[^.]{10}\.[^.]+" {
-                      add_header "" "";
+                        add_header "" "";
                     }
                     location ~ "^/pagespeed_static/" { }
                     location ~ "^/ngx_pagespeed_beacon$" { }
-                    See the Admin Page documentation for instructions on how to configure handlers to provide visibility and control into PageSpeed's operation.
+                </code>
+
+                See the Admin Page documentation for instructions on how to configure handlers to provide visibility and control into PageSpeed's operation.
             </p>
-            <code>
-
-            </code>
-            <li>
-
-            </li>
         </section>
         <section class="main-section" id="Apache-Specific_Configuration">
             <header>Apache-Specific Configuration</header>
             <p>
-                    Setting up the Output Filter 🔗
-                    
-                    The output filter is used to parse, optimize, and re-serialize HTML content that is generated elsewhere in the Apache server.
-                    
+                <h2>Setting up the Output Filter</h2>
+                
+                The output filter is used to parse, optimize, and re-serialize HTML content that is generated elsewhere in the Apache server.
+                
+                <code>
                     # Direct Apache to send all HTML output to the mod_pagespeed output handler.
                     AddOutputFilterByType MOD_PAGESPEED_OUTPUT_FILTER text/html
-                    Note: mod_pagespeed automatically enables mod_deflate for compression.
-                    
-                    Turning the module on and off 🔗
-                    
-                    To turn mod_pagespeed ON, insert as the top line of pagespeed.conf:
-                    
+                </code>
+                <code class="note">
+                    <strong>Note:</strong> mod_pagespeed automatically enables mod_deflate for compression.
+                </code>
+                
+                <h2>Turning the module on and off</h2>
+                
+                To turn mod_pagespeed ON, insert as the top line of pagespeed.conf:
+                
+                <code>
                     ModPagespeed on
-                    There are two ways to disable mod_pagespeed. To disable HTML rewriting but continue to serve .pagespeed. resources and parse query options (for instance for ?ModPagespeed=on) put this line in your configuration:
-                    
+                </code>
+
+                There are two ways to disable mod_pagespeed. To disable HTML rewriting but continue to serve .pagespeed. resources and parse query options (for instance for ?ModPagespeed=on) put this line in your configuration:
+                
+                <code>
                     ModPagespeed off
-                    To completely disable mod_pagespeed (.pagespeed. resources will result in 404s) use the following line:
-                    
+                </code>
+
+                To completely disable mod_pagespeed (.pagespeed. resources will result in 404s) use the following line:
+                
+                <code>
                     ModPagespeed unplugged
-                    The on and off values can be used in .htaccess files, <Directory> scopes, query parameters, and headers. The unplugged value can only be used in the top-level Apache configuration and in virtual hosts. Note that ModPagespeed on in a virtual host can override a top-level unplugged directive.
-                    
-                    Support for Apache 2.4.x 🔗
-                    
-                    mod_pagespeed is compatible with Apache 2.2.x and Apache 2.4.x series, versions 2.4.2 and newer. Please note that Apache 2.4.1 has a bug that may cause stability problems in combination with mod_pagespeed, so use with 2.4.1 is strongly discouraged.
-                    
-                    As Apache 2.4 is not API compatible with 2.2, support for it is provided via a separate module binary, mod_pagespeed_ap24.so instead of the usual mod_pagespeed.so. The configuration provided in our binary packages will normally load the right module version automatically. However, if you upgrade the CentOS packages from an earlier version, the needed configuration change may not get applied on top of a user-customized pagespeed.conf, so you may need to adjust the LoadModule line manually.
-                    
-                    Source builds with mod_pagespeed-provided Apache headers will build both 2.2.x and 2.4.x binaries as well, and you will need to add a LoadModule line matching the server version in use, or use a pattern similar to:
-                    
-                    <IfModule !mod_version.c>
-                      LoadModule version_module /usr/lib/apache2/modules/mod_version.so
-                    </IfModule>
-                    
-                    <IfVersion < 2.4>
-                      LoadModule pagespeed_module /usr/lib/apache2/modules/mod_pagespeed.so
-                    </IfVersion>
-                    <IfVersion >= 2.4.2>
-                      LoadModule pagespeed_module /usr/lib/apache2/modules/mod_pagespeed_ap24.so
-                    </IfVersion>
-                    to auto-detect. Builds against system Apache headers will only be compatible with that version family, and will always produce a single module named mod_pagespeed.so.
+                </code>
+
+                The on and off values can be used in .htaccess files, <Directory> scopes, query parameters, and headers. The unplugged value can only be used in the top-level Apache configuration and in virtual hosts. Note that ModPagespeed on in a virtual host can override a top-level unplugged directive.
+                
+                <h2>Support for Apache 2.4.x</h2>
+                
+                mod_pagespeed is compatible with Apache 2.2.x and Apache 2.4.x series, versions 2.4.2 and newer. Please note that Apache 2.4.1 has a bug that may cause stability problems in combination with mod_pagespeed, so use with 2.4.1 is strongly discouraged.
+                
+                As Apache 2.4 is not API compatible with 2.2, support for it is provided via a separate module binary, mod_pagespeed_ap24.so instead of the usual mod_pagespeed.so. The configuration provided in our binary packages will normally load the right module version automatically. However, if you upgrade the CentOS packages from an earlier version, the needed configuration change may not get applied on top of a user-customized pagespeed.conf, so you may need to adjust the LoadModule line manually.
+                
+                Source builds with mod_pagespeed-provided Apache headers will build both 2.2.x and 2.4.x binaries as well, and you will need to add a LoadModule line matching the server version in use, or use a pattern similar to:
+                
+                <IfModule !mod_version.c>
+                    LoadModule version_module /usr/lib/apache2/modules/mod_version.so
+                </IfModule>
+                
+                <IfVersion < 2.4>
+                    LoadModule pagespeed_module /usr/lib/apache2/modules/mod_pagespeed.so
+                </IfVersion>
+                <IfVersion >= 2.4.2>
+                    LoadModule pagespeed_module /usr/lib/apache2/modules/mod_pagespeed_ap24.so
+                </IfVersion>
+                to auto-detect. Builds against system Apache headers will only be compatible with that version family, and will always produce a single module named mod_pagespeed.so.
             </p>
             <code>
     
@@ -294,15 +313,17 @@
         <section class="main-section" id="Location-Specific_Configuration">
             <header>Location-Specific Configuration</header>
             <p>
-                    With an .htaccess file (Apache), <Directory> scope (Apache), or location block (Nginx) you can control most of the PageSpeed directives. Note, however, that the file-matching is only relevant to the HTML file, and not to any of the resources referenced from the HTML file. To restrict resources by directory, you must use the PageSpeed Allow and Disallow directives, using full paths or wildcards in those directives.
-                            
-                            Warning: Resources and the HTML files that reference them must have the same options. If they differ you may see poor performance and inconsistent application of options.
-                            
-                            In Apache, the advantage of .htaccess is that it can be used in environments where the site administrator does not have access to the server configuration. However, there is a significant per-request overhead from processing .htaccess files. See The Apache HTTP Server Documentation:
-                            
-                            Note: You should avoid using .htaccess files completely if you have access to the httpd main server config file. Using .htaccess files slows down your Apache server. Any directive that you can include in a .htaccess file is better set in a <Directory> block, as it will have the same effect with better performance.
-                            
-                            Virtual hosts are generally a better way of configuring multiple sites on the same server.
+                With an .htaccess file (Apache), <Directory> scope (Apache), or location block (Nginx) you can control most of the PageSpeed directives. Note, however, that the file-matching is only relevant to the HTML file, and not to any of the resources referenced from the HTML file. To restrict resources by directory, you must use the PageSpeed Allow and Disallow directives, using full paths or wildcards in those directives.
+                        
+                <code class="warning">
+                    <strong>Warning:</strong> Resources and the HTML files that reference them must have the same options. If they differ you may see poor performance and inconsistent application of options.
+                </code>
+ 
+                In Apache, the advantage of .htaccess is that it can be used in environments where the site administrator does not have access to the server configuration. However, there is a significant per-request overhead from processing .htaccess files. See The Apache HTTP Server Documentation:
+                
+                Note: You should avoid using .htaccess files completely if you have access to the httpd main server config file. Using .htaccess files slows down your Apache server. Any directive that you can include in a .htaccess file is better set in a <Directory> block, as it will have the same effect with better performance.
+                
+                Virtual hosts are generally a better way of configuring multiple sites on the same server.
             </p>
             <code>
                                 

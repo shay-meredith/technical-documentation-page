@@ -1,3 +1,6 @@
+img, embed, object, video {
+    max-width: 100%;
+}
 body {
     background-color: #ffffff;
     font-family: "Roboto", sans-serif;
@@ -56,6 +59,24 @@ header {
     border-radius: 5px;
     box-shadow: 1px 1px 1px rgba(222, 222, 222, 0.6);
     margin: -1px; 
+}
+strong { 
+    font-weight: bold; 
+}
+code {
+    background-color: rgba(165, 165, 165, 0.2);
+    display: block;
+    font-size: 0.9em;
+    margin: 10px 0px;
+    padding: 20px;
+}
+.note {
+    background-color: rgba(60, 60, 220, 0.2);
+    font-size: 1.1em;
+}
+.warning {
+    background-color: rgba(220, 60, 60, 0.2);
+    font-size: 1.1em;
 }
 footer {
     background-color: #00BCD4;
