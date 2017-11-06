@@ -6,6 +6,7 @@ body {
     font-family: "Roboto", sans-serif;
     font-size: 1.2em;
     font-weight: 300;
+    
 }
 main {
     max-width: 70%;
@@ -24,7 +25,6 @@ h1 {
 }
 h2 {
     padding-top: 15px;
-    text-align: center;
 }
 header {
     align-items: center;
@@ -60,15 +60,29 @@ header {
     box-shadow: 1px 1px 1px rgba(222, 222, 222, 0.6);
     margin: -1px; 
 }
+a {
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+    text-decoration-color: blue;
+}
 strong { 
     font-weight: bold; 
 }
 code {
-    background-color: rgba(165, 165, 165, 0.2);
+    background-color: rgba(220, 220, 220, 0.3);
     display: block;
+    color: black;
+    font-family: monospace;
     font-size: 0.9em;
     margin: 10px 0px;
-    padding: 20px;
+    padding: 10px;
+    text-decoration: none;
+}
+.inline-code {
+    display: inline;
+    padding: 2px;
 }
 .note {
     background-color: rgba(60, 60, 220, 0.2);
